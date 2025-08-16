@@ -47,8 +47,8 @@
                     }
                 }
             }
-            
-            $data['id'] = $highest_id + 1;
+            if (count($documents) > 0)
+                $data['id'] = $highest_id + 1;
             array_push($documents, $data);
             file_put_contents($data_path, json_encode($documents, JSON_PRETTY_PRINT));
             break;
@@ -125,8 +125,7 @@
                     $id = $doc['id'];
                     $des = $doc['description'];
                     $status = $doc['status'];
-                    displayData($id, $des, $status);
-                    displayLine();
+                    displayCell($id, $des, $status);
                 }
                 exit;
             }
