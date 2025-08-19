@@ -4,16 +4,27 @@
     include __DIR__ . '/help.php';
     $data_path = __DIR__ . '/data.json';
 
+    // Requirement required
     if (!isset($argv[1])) {
         echo "You need to add requirement";
         exit;
     }
 
+    // If task list is empty --> table's inavailable
+    if (!file_exists($data_path) && $argv[1] != 'add') {
+        echo "Your To-do list is empty \n";
+        echo "Please add your tasks first";
+        exit;
+    }
+    
+    // command is not a case-sensitive
     $action = strtolower($argv[1]);
 
+    // Get date
     $now = new DateTime("now", new DateTimeZone("Asia/Ho_Chi_Minh"));
     $now = $now->format('d-m-Y H:i:s');
 
+    // Default data form
     $data = [
         "id" => 1,
         "description" => null,
@@ -42,6 +53,10 @@
 
             foreach ($documents as $doc) {
                 foreach($doc as $key => $val) {
+                    if ($val == $data['description']) {
+                        echo "Task existed! Failure adding";
+                        exit;
+                    }
                     if ($key === "id" && $val > $highest_id) {
                         $highest_id = $val;
                     }
@@ -53,17 +68,32 @@
             file_put_contents($data_path, json_encode($documents, JSON_PRETTY_PRINT));
             break;
         case "update":
+            
             $request_id = $argv[2];
-            $request_description = $argv[3];
+            if (isset($argv[3]) && !($argv[3] >= '0' && $argv[3] <= '9')) {
+                $request_description = $argv[3];
+            }
+            else {
+                echo "Text is required";
+                exit;
+            }
 
             $data_file = file_get_contents($data_path);
             $documents = json_decode($data_file,true);
+
+            $update_status = false;
 
             foreach($documents as &$doc) {
                 if ($doc['id'] == $request_id) {
                     $doc['description'] = $request_description;
                     $doc['update time'] = $now;
+                    $update_status = true;
                 }
+            }
+
+            if (!$update_status) {
+                echo "Task's ID does not exist";
+                exit;
             }
             unset($doc);
             file_put_contents($data_path, json_encode($documents, JSON_PRETTY_PRINT));
@@ -74,12 +104,21 @@
             $data_file = file_get_contents($data_path);
             $documents = json_decode($data_file, true);
 
+            $delete_status = false;
+
             foreach($documents as $i => $doc) {
                 if ($doc['id'] == $request_id) {
                     array_splice($documents,$i, 1);
+                    $delete_status = true;
                     break;
                 }
             }
+
+            if (!$delete_status) {
+                echo "Task's ID does not exist";
+                exit;
+            }
+
             file_put_contents($data_path, json_encode($documents, JSON_PRETTY_PRINT));
             break;
         case "mark-in-progress":
@@ -88,12 +127,20 @@
             $data_file = file_get_contents($data_path);
             $documents = json_decode($data_file, true);
 
+            $mark_status = false;
+
             foreach($documents as &$doc) {
                 if ($doc['id'] == $request_id) {
                     $doc['status'] = "in progress";
+                    $mark_status = true;
                     unset($doc);
                     break;
                 }
+            }
+
+            if (!$mark_status) {
+                echo "Task's ID does not exist";
+                exit;
             }
             file_put_contents($data_path, json_encode($documents, JSON_PRETTY_PRINT));
             break;
@@ -103,12 +150,20 @@
             $data_file = file_get_contents($data_path);
             $documents = json_decode($data_file, true);
 
+            $mark_status = false;
+
             foreach($documents as &$doc) {
                 if ($doc['id'] == $request_id) {
                     $doc['status'] = "done";
+                    $mark_status = true;
                     unset($doc);
                     break;
                 }
+            }
+
+            if (!$mark_status) {
+                echo "Task's ID does not exist";
+                exit;
             }
             file_put_contents($data_path, json_encode($documents, JSON_PRETTY_PRINT));
             break;
@@ -155,6 +210,9 @@
                     break;
             }
             break;
+        default:
+            echo "This command is not allowed";
+            exit;
     }
 
 ?>

@@ -1,7 +1,8 @@
 <?php
     const STT_WIDTH = 3;
-    const DES_WIDTH = 30;
+    const DES_WIDTH = 50;
     const STATUS_WIDTH = 10;
+
     function repeatChar($c, $num) {
         $result = "";
         for($i = 0; $i < $num; ++$i) {
@@ -12,13 +13,13 @@
     function printCenter($content, $width) {
         $content_width = is_numeric($content) ? strlen((string)$content): strlen($content);
         
-        $padding = intval(($width - $content_width) / 2);
         $result = "";
-        $result .= repeatChar(' ', $padding);
         if ($content_width > $width) {
-            $result .= substr($content, 0, $width - $padding - 3) . "...";
+            $result .= substr($content, 0, $width - 3) . "...";
         }
         else {
+            $padding = intval(($width - $content_width) / 2);
+            $result .= repeatChar(' ', $padding);
             $result .= $content;
             $result .= repeatChar(' ', $width - $content_width - $padding);
         }
